@@ -1,0 +1,21 @@
+#!/bin/bash
+
+usage()
+{
+  echo "Flash air101/103 base firmware to target device."
+  echo "Usage: ./flash-base-firmware <base firmware for air101/103>"
+}
+
+if [ ! -f "./wm_tool_luatos" ]; then
+  echo "please build wm_tool_luatos first."
+  exit
+fi
+
+# if no args
+if [ $# -ne 1 ]; then
+  usage
+  exit
+fi
+
+FIRMWARE="$1"
+./wm_tool_luatos -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl $FIRMWARE
