@@ -2,6 +2,11 @@
 
 This project provide a set of utils and scripts to compile and generate the script.img for LuatOS with OpenLuat AIR101 / AIR103 Soc/Devboards.
 
+## Build
+Type `make` to build the project. `mkscriptbin` and `wm_tool_luatos` had no external dependencies, `luac` will be built as 32bit elf and requires some 32bit libraries and development packages, such as readline, please install it according to your distribution.
+
+After built successfully, `luac` / `mkscriptbin` and `wm_tool_luatos` will be generated at current dir, and will be used by `gen-script-img` and `flash-script-img`.
+
 ## Usage
 - create a `src` dir, put lua sources and other resources into it.
 - run `gen-script-img [air101|air103] src_dir` to generate `script.img` for air101 or air103.
