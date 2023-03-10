@@ -7,7 +7,11 @@ all:
 	gcc -o luatos-wm_tool utils/wm_tool_mod_by_luatos.c
 	rm -rf $(LUA)
 	tar xf utils/$(LUA).tar.gz
-	sed -i "s/^CC= gcc -std=gnu99/CC= gcc -m32 -std=gnu99/g" $(LUA)/src/Makefile
+	# 32bit ELF: 1b 4c 75 61 53 00 19 93   0d 0a 1a 0a 04 04 04 04
+	# 64bit ELF: 1b 4c 75 61 53 00 19 93   0d 0a 1a 0a 04 08 04 04
+	# The only difference built luac as 32bit or 64bit is 0x04 and 0x08,
+	# it's the sizeof(size_t) cause this different.
+	sed -i "s/DumpByte(sizeof(size_t), D)/DumpByte(sizeof(int), D)/g" $(LUA)/src/ldump.c
 	sed -i "s/^CFLAGS= -O2 -Wall -Wextra -DLUA_COMPAT_5_2/CFLAGS= -O2 -Wall -Wextra -DLUA_32BITS/g" $(LUA)/src/Makefile
 	make -C $(LUA) linux && cp $(LUA)/src/luac ./luatos-luac && rm -rf $(LUA)
 
