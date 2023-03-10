@@ -34,6 +34,22 @@ Or
 picocom -b 921600 /dev/ttyUSB0 --imap spchex,lfcrlf
 ```
 
+## RTS behavior
+
+Open serial port will cause target device RESET with Linux (Windows will not). If your devboards has RTS or DTR pin connect to RESET pin of the chip, every time the serial port opened, it will reset target device.
+
+Refer to [https://stackoverflow.com/questions/5090451/how-to-open-serial-port-in-linux-without-changing-any-pin](https://stackoverflow.com/questions/5090451/how-to-open-serial-port-in-linux-without-changing-any-pin) for more info.
+
+For LuatOS, it heavily depend on UART log for debugging and monitoring, everytime the serial port opened, it will reset the target device. this hehavior is unacceptable.
+
+For Air 101 and 103 board, there is CH34X UART chip on board, we can change this behavior by modify the driver source code.
+
+You can download the `ch341.c` from `drivers/usb/serial/ch341.c` of upstream kernel, and find `ch341_dtr_rts` function, comment out all contents of this function and put it in `ch341-mod` dir.
+
+Then type `make` to build the new driver, it will rename the driver to `ch341-uart.ko`. you can :
+- either blacklist original `ch341.ko` and install this new driver.
+- or `sudo rmmod ch341.ko && insmod ./ch341-kmod/ch341-uart.ko` everytime you need it.
+ 
 ## Dir structure
 ```
 luatos-utils
