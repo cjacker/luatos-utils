@@ -11,9 +11,11 @@ For a complete tutorial, refer to : https://github.com/cjacker/opensource-toolch
 **NOTE :** there is no plan to support AIR105, AIR105 and MH1903S is identical and based on ARM core. Since it didn't export SWD interface, without modify the hardware of AIR105 devboard, there is no way to program it with CMSIS-DAP, Jlink, ST-Link, etc. Either you switch to Windows, or you can use [air105-uploader](https://github.com/racerxdl/air105-uploader) with [mh1903s firmware library](https://github.com/cjacker/mh1903_firmware_library_gcc_makefile) instead.
 
 ## Build
-Type `make` to build the project. `luatos-mkscriptbin` and `luatos-wm_tool` had no external dependencies, `luac` will be built as 32bit elf and requires some 32bit libraries and development packages, such as readline, please install it according to your distribution.
+Type `make` to build the project. After built successfully, `luatos-luac` / `luatos-mkscriptbin` and `luatos-wm_tool` will be generated at current dir, and will be used by `luatos-gen-script-img` and `luatos-flash-script-img`.
 
-After built successfully, `luatos-luac` / `luatos-mkscriptbin` and `luatos-wm_tool` will be generated at current dir, and will be used by `luatos-gen-script-img` and `luatos-flash-script-img`.
+NOTE, there are some changes to upstream `luac` includes:
+- built is with "-DLUA_32BITS"
+- 64bit ELF will generate luac header with `sizeof(size_t)`, it's 8 for 64bit, and can not supported by LuatOS, change it to `sizeof(int)`.
 
 ## Install
 You can use all scripts in current dir without installation, if you want to install it to system wide :
