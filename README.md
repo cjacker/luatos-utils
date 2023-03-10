@@ -16,3 +16,22 @@ And program to target device as:
 ```
 ./wm_tool_luatos -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl AIR101.fls
 ```
+
+# Dir structure
+```
+luatos-utils
+├── ch341-mod
+│   ├── ch341.c
+│   └── Makefile
+├── flash-script-img : a script to flash script.img to air101 / 103
+├── gen-script-img : a script to generate script.img for air101 / 103
+├── LICENSE
+├── luatos-app-src : LVGL demo project works with AIR 101 / 103 and OpenLuat LCD panel.
+│   └── main.lua
+├── Makefile : build all related utils
+├── README.md : this file
+└── utils
+    ├── lua-5.3.6.tar.gz : upstream lua tarball, used to build 32bit luac
+    ├── mkscriptbin.c : source of mkscriptbin, a tool to generate script.bin in luadb format
+    └── wm_tool_mod_by_luatos.c : source of air101 / 103 firmware convert and flash tool
+```
