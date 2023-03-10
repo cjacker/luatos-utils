@@ -29,7 +29,7 @@ Or
 picocom -b 921600 /dev/ttyUSB0 --imap spchex,lfcrlf
 ```
 
-# Dir structure
+## Dir structure
 ```
 luatos-utils
 ├── ch341-mod
