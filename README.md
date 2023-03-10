@@ -2,6 +2,8 @@
 
 This project provide a set of utils and scripts to compile and generate the script.img for LuatOS with OpenLuat AIR101 / AIR103 Soc/Devboards.
 
+For a complete tutorial, refer to : https://github.com/cjacker/opensource-toolchain-w80x
+
 ## Build
 Type `make` to build the project. `mkscriptbin` and `wm_tool_luatos` had no external dependencies, `luac` will be built as 32bit elf and requires some 32bit libraries and development packages, such as readline, please install it according to your distribution.
 
@@ -82,8 +84,8 @@ luatos-utils
 ├── flash-script-img : a script to flash script.img to air101 / 103
 ├── gen-script-img : a script to generate script.img for air101 / 103
 ├── LICENSE
-├── luatos-app-src : LVGL demo project works with AIR 101 / 103 and OpenLuat LCD panel.
-│   └── main.lua
+├── lvgl-demo : LVGL button demo project works with AIR 101 / 103 and OpenLuat LCD panel.
+├── blink-demo : LED blink demo project works with AIR 101 / 103 devboard.
 ├── Makefile : build all related utils
 ├── README.md : this file
 └── utils
