@@ -72,7 +72,7 @@ if [ "$1""x" == "air101""x" ]; then
   echo ""
   echo "It can be programmed by:"
   echo "./flash-script-img air101 script-for-air101.img"
-elif ["$1""x" == "air103""x"]; then
+elif [ "$1""x" == "air103""x" ]; then
   ./wm_tool_luatos -b script.bin -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -o script-for-air103
   echo "script-for-air103.img generated !"
   echo "It can be programmed by:"
