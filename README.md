@@ -1,8 +1,10 @@
 # luatos-utils
 
-This project provide a set of utils and scripts to compile and generate the script.img for LuatOS with OpenLuat AIR101 / AIR103 Soc/Devboards.
+This project provide a set of utils and scripts to compile and generate the script.bin and script.img for LuatOS with OpenLuat AIR101 / AIR103 Soc / Devboards.
 
-For a complete tutorial, refer to : https://github.com/cjacker/opensource-toolchain-w80x
+For a complete tutorial, refer to : https://github.com/cjacker/opensource-toolchain-w80x-air101-air103
+
+**NOTE :** there is no plan to support AIR105, AIR105 and MH1903S is identical and based on ARM core. Since it didn't export SWD interface, without modify the hardware of AIR105 devboard, there is no way to program it with CMSIS-DAP, Jlink, ST-Link, etc. Either you switch to Windows, or you can use [air105-uploader](https://github.com/racerxdl/air105-uploader) with [mh1903s firmware library](https://github.com/cjacker/mh1903_firmware_library_gcc_makefile) instead.
 
 ## Build
 Type `make` to build the project. `luatos-mkscriptbin` and `luatos-wm_tool` had no external dependencies, `luac` will be built as 32bit elf and requires some 32bit libraries and development packages, such as readline, please install it according to your distribution.
