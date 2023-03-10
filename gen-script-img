@@ -12,7 +12,7 @@
 usage()
 {
   echo "Generate air101/103 script.img."
-  echo "Usage: ./gen-script-img [air101|air103]"
+  echo "Usage: ./gen-script-img [air101|air103] src_dir"
 }
 
 if [ ! -f "./luac" ] && [ ! -f "./mkscriptbin" ] && [ ! -f "./wm_tool_luatos" ]; then
@@ -21,21 +21,29 @@ if [ ! -f "./luac" ] && [ ! -f "./mkscriptbin" ] && [ ! -f "./wm_tool_luatos" ];
 fi
 
 # if no args
-if [ $# -ne 1 ]; then
+if [ $# -ne 2 ]; then
+  echo "Error: wrong arguments"
   usage
   exit
 fi
 
 # if not air101 and air103
 if [ "$1" != "air101" ] && [ "$1" != "air103" ]; then
+  echo "Error: only support air101 and air103"
   usage
   exit
 fi 
 
+if [ ! -d "$2" ]; then
+  echo "Error : source dir not exist."
+  usage
+  exit
+fi
+
 # compile all lua sources in src dir to disk dir,
 # and copy all resources in src dir to disk dir.
 TARGET_DIR=./disk
-SOURCE_DIR=./luatos-app-src
+SOURCE_DIR="$2"
 
 if [ ! -d $SOURCE_DIR ]; then 
   echo "You should create ./luatos-app-src dir and"
@@ -72,5 +80,6 @@ elif ["$1""x" == "air103""x"]; then
   echo "./flash-script-img air103 script-for-air103.img"
 fi
 rm -f script.bin
+rm -rf disk
 exit
 
