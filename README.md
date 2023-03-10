@@ -5,14 +5,21 @@ This project provide a set of utils and scripts to compile and generate the scri
 For a complete tutorial, refer to : https://github.com/cjacker/opensource-toolchain-w80x
 
 ## Build
-Type `make` to build the project. `mkscriptbin` and `wm_tool_luatos` had no external dependencies, `luac` will be built as 32bit elf and requires some 32bit libraries and development packages, such as readline, please install it according to your distribution.
+Type `make` to build the project. `luatos-mkscriptbin` and `luatos-wm_tool` had no external dependencies, `luac` will be built as 32bit elf and requires some 32bit libraries and development packages, such as readline, please install it according to your distribution.
 
-After built successfully, `luac` / `mkscriptbin` and `wm_tool_luatos` will be generated at current dir, and will be used by `gen-script-img` and `flash-script-img`.
+After built successfully, `luatos-luac` / `luatos-mkscriptbin` and `luatos-wm_tool` will be generated at current dir, and will be used by `luatos-gen-script-img` and `luatos-flash-script-img`.
+
+## Install
+You can use all scripts in current dir without installation, if you want to install it to system wide :
+
+```
+sudo make install DESTDIR=<DEST DIR>
+```
 
 ## Usage
 - create a `src` dir, put lua sources and other resources into it.
-- run `gen-script-img [air101|air103] src_dir` to generate `script.img` for air101 or air103.
-- run `flash-script-img [air101|air103] <script.img>` to program `script.img` to air101 or air103.
+- run `luatos-gen-script-img [air101|air103] src_dir` to generate `script.img` for air101 or air103.
+- run `luatos-flash-script-img [air101|air103] <script.img>` to program `script.img` to air101 or air103.
 
 This `script.img` can also be append to LuatOS base firmware and generate a whole img, such as:
 ```
@@ -21,7 +28,11 @@ cat script.img >>AIR101.fls
 
 And program to target device as:
 ```
-./wm_tool_luatos -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl AIR101.fls
+luatos-wm_tool -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl AIR101.fls
+```
+Or
+```
+luatos-flash-base-firmware AIR101.fls
 ```
 
 ## LuatOS Base firmware
@@ -41,7 +52,12 @@ Using air101 firmware as example, after extracted, you will find a `LuatOS-SoC_V
 
 After extracted, `AIR101.fls` is the 'base firmware' you can program to AIR101 devboards as :
 ```
-wm_tool -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl AIR101.fls
+luatos-wm_tool -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl AIR101.fls
+```
+
+Or 
+```
+luatos-flash-base-firmware AIR101.fls
 ```
 
 Air103 is as same as Air101, but the default demo in this project use LVGL, if you want to use this demo, you should extract the `LuatOS-SoC_VERSION_AIR103_LVGL.soc` to get 'AIR103.fls'.
@@ -81,8 +97,9 @@ luatos-utils
 ├── ch341-mod
 │   ├── ch341.c
 │   └── Makefile
-├── flash-script-img : a script to flash script.img to air101 / 103
-├── gen-script-img : a script to generate script.img for air101 / 103
+├── luatos-flash-base-firmware : a script to flash upstream base firmware to air101 / 103
+├── luatos-flash-script-img : a script to flash script.img to air101 / 103
+├── luatos-gen-script-img : a script to generate script.img for air101 / 103
 ├── LICENSE
 ├── lvgl-demo : LVGL button demo project works with AIR 101 / 103 and OpenLuat LCD panel.
 ├── blink-demo : LED blink demo project works with AIR 101 / 103 devboard.

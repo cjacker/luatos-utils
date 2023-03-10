@@ -9,14 +9,18 @@
 # cat script-for-air[101|103].img >>final.fls
 # rm -f script.img script.bin
 
+
+# which dir this script at.
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+
 usage()
 {
   echo "Generate air101/103 script.img."
-  echo "Usage: ./gen-script-img [air101|air103] src_dir"
+  echo "Usage: luatos-gen-script-img [air101|air103] src_dir"
 }
 
-if [ ! -f "./luac" ] && [ ! -f "./mkscriptbin" ] && [ ! -f "./wm_tool_luatos" ]; then
-  echo "please build luac & mkscriptbin & wm_tool_luatos first."
+if [ ! -f "$SCRIPT_DIR/luatos-luac" ] && [ ! -f "$SCRIPT_DIR/luatos-mkscriptbin" ] && [ ! -f "$SCRIPT_DIR/luatos-wm_tool" ]; then
+  echo "please build luatos-luac & luatos-mkscriptbin & luatos-wm_tool first."
   exit
 fi
 
@@ -42,12 +46,12 @@ fi
 
 # compile all lua sources in src dir to disk dir,
 # and copy all resources in src dir to disk dir.
-TARGET_DIR=./disk
+TARGET_DIR=$(mktemp -d)
 SOURCE_DIR="$2"
 
 if [ ! -d $SOURCE_DIR ]; then 
-  echo "You should create ./luatos-app-src dir and"
-  echo "put luatos app sources and resources in it."
+  echo "Error: $SOURCE_DIR not exist."
+  echo "you should create a dir and put lua sources and other resources in it."
   exit
 fi
 
@@ -56,30 +60,35 @@ rm -rf $TARGET_DIR && mkdir $TARGET_DIR
 for i in `ls $SOURCE_DIR`; do
   if [[ "$i" = *.lua ]]; then
     FILENAME_NO_SUF=$(basename -s .lua $i)
-    ./luac -o $TARGET_DIR/$FILENAME_NO_SUF.luac $SOURCE_DIR/$i
+    $SCRIPT_DIR/luatos-luac -o $TARGET_DIR/$FILENAME_NO_SUF.luac $SOURCE_DIR/$i
   else
     cp $SOURCE_DIR/$i $TARGET_DIR/
   fi
 done
 
 # generate script.bin file
-./mkscriptbin
+$SCRIPT_DIR/luatos-mkscriptbin $TARGET_DIR
+
+if [ ! -f "./script.bin" ]; then
+	echo "Generate script.bin failed !"
+	exit
+fi
 
 # generate script.img file for AIR101
 if [ "$1""x" == "air101""x" ]; then
-  ./wm_tool_luatos -b script.bin -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -o script-for-air101
-  echo "script-for-air101.img generated !"
+  $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -o script-for-air101
+  echo "script-for-air101.img generated."
   echo ""
   echo "It can be programmed by:"
-  echo "./flash-script-img air101 script-for-air101.img"
+  echo "luatos-flash-script-img air101 script-for-air101.img"
 elif [ "$1""x" == "air103""x" ]; then
-  ./wm_tool_luatos -b script.bin -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -o script-for-air103
-  echo "script-for-air103.img generated !"
+  $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -o script-for-air103
+  echo "script-for-air103.img generated."
   echo "It can be programmed by:"
   echo ""
-  echo "./flash-script-img air103 script-for-air103.img"
+  echo "luatos-flash-script-img air103 script-for-air103.img"
 fi
 rm -f script.bin
-rm -rf disk
+rm -rf $TARGET_DIR 
 exit
 

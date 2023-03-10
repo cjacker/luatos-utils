@@ -1,3 +1,7 @@
+// a tool to generate script.bin for LuatOS,
+// script.bin is in luadb format, refer to 
+// upstream spec : https://wiki.luatos.com/develop/contribute/luadb.html
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -19,21 +23,31 @@ Node* add_node(Node *head, char *filename) {
     return new_node;
 }
 
-int main() {
+void help() {
+	printf("luatos-mkscriptbin - a tool to generate script.bin for LuatOS\n");
+	printf("Usage : luatos-mkscriptbin <dist dir>\n");
+}
+
+int main(int argc, char* argv[]) {
+	if(argc != 2) {
+		help();
+		exit(0);
+	}
+
     DIR *dir;
     struct dirent *ent;
 	Node *head = NULL;
-    char *disk_path = "./disk"; // 要列出文件的目录
+    char *disk_path = argv[1]; // disk path
     uint16_t file_count = 0;
 
     dir = opendir(disk_path);
     if (dir == NULL) {
-        perror("Open './disk' dir failed.");
+        fprintf(stderr, "Open %s dir failed.", disk_path);
         return 1;
     }
 
     while ((ent = readdir(dir)) != NULL) {
-        if (ent->d_type == DT_REG) { // 如果是普通文件
+        if (ent->d_type == DT_REG) { // if regular file
             //printf("%s\n", ent->d_name);
 			head = add_node(head, ent->d_name);
             file_count++;
@@ -43,6 +57,10 @@ int main() {
     //printf("file count : %d\n", file_count);
     closedir(dir);
 
+	if(file_count == 0) {
+		fprintf(stderr, "Error : no file in %d dir", disk_path);
+		exit(1);
+	}
 
     FILE *fp;
     char filename[] = "script.bin";
@@ -101,8 +119,8 @@ int main() {
 
 		// open file to get file size and contents
 
-		char *filename = malloc(strlen("./disk/") + strlen(current->filename) + 1);
-		sprintf(filename, "./disk/%s", current->filename);
+		char *filename = malloc(strlen(disk_path) + strlen(current->filename) + 1);
+		sprintf(filename, "%s/%s", disk_path, current->filename);
 	
     	FILE *file;
     	long size;
