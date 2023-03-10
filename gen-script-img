@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# uart connection:
+# picocom -b 921600 /dev/ttyUSB0 --imap spchex,lfcrlf
+# tio -b 921600 /dev/ttyUSB0 -m INLCRNL
+
+# generate whole firmware:
+# cp AIR[101|103].fls final.fls
+# cat script-for-air[101|103].img >>final.fls
+# rm -f script.img script.bin
+
+usage()
+{
+  echo "Generate air101/103 script.img."
+  echo "Usage: ./gen-script-img [air101|air103]"
+}
+
+if [ ! -f "./luac" ] && [ ! -f "./mkscriptbin" ] && [ ! -f "./wm_tool_luatos" ]; then
+  echo "please build luac & mkscriptbin & wm_tool_luatos first."
+  exit
+fi
+
+# if no args
+if [ $# -ne 1 ]; then
+  usage
+  exit
+fi
+
+# if not air101 and air103
+if [ "$1" != "air101" ] && [ "$1" != "air103" ]; then
+  usage
+  exit
+fi 
+
+# compile all lua sources in src dir to disk dir,
+# and copy all resources in src dir to disk dir.
+TARGET_DIR=./disk
+SOURCE_DIR=./luatos-app-src
+
+if [ ! -d $SOURCE_DIR ]; then 
+  echo "You should create ./luatos-app-src dir and"
+  echo "put luatos app sources and resources in it."
+  exit
+fi
+
+rm -rf $TARGET_DIR && mkdir $TARGET_DIR
+
+for i in `ls $SOURCE_DIR`; do
+  if [[ "$i" = *.lua ]]; then
+    FILENAME_NO_SUF=$(basename -s .lua $i)
+    ./luac -o $TARGET_DIR/$FILENAME_NO_SUF.luac $SOURCE_DIR/$i
+  else
+    cp $SOURCE_DIR/$i $TARGET_DIR/
+  fi
+done
+
+# generate script.bin file
+./mkscriptbin
+
+# generate script.img file for AIR101
+if [ "$1""x" == "air101""x" ]; then
+  ./wm_tool_luatos -b script.bin -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -o script-for-air101
+  echo "script-for-air101.img generated !"
+  echo ""
+  echo "It can be programmed by:"
+  echo "./flash-script-img air101 script-for-air101.img"
+elif ["$1""x" == "air103""x"]; then
+  ./wm_tool_luatos -b script.bin -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -o script-for-air103
+  echo "script-for-air103.img generated !"
+  echo "It can be programmed by:"
+  echo ""
+  echo "./flash-script-img air103 script-for-air103.img"
+fi
+rm -f script.bin
+exit
+
