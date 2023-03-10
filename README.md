@@ -7,7 +7,7 @@ This project provide a set of utils and scripts to compile and generate the scri
 - run `gen-script-img [air101|air103]` to generate script.img for air101 or air103.
 - run `flash-script-img [air101|air103] <script.img>` to program script.img to air101 or air103.
 
-This `script.img` can be append to LuatOS base firmware and generate a whole img, such as:
+This `script.img` can also be append to LuatOS base firmware and generate a whole img, such as:
 ```
 cat script.img >>AIR101.fls
 ```
