@@ -17,6 +17,18 @@ And program to target device as:
 ./wm_tool_luatos -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl AIR101.fls
 ```
 
+## UART connection
+After script.img programmed, you can use below commands to connect to devboard via UART:
+
+```
+tio -b 921600 /dev/ttyUSB0 -m INLCRNL
+```
+Or
+
+```
+picocom -b 921600 /dev/ttyUSB0 --imap spchex,lfcrlf
+```
+
 # Dir structure
 ```
 luatos-utils
@@ -31,7 +43,7 @@ luatos-utils
 ├── Makefile : build all related utils
 ├── README.md : this file
 └── utils
-    ├── lua-5.3.6.tar.gz : upstream lua tarball, used to build 32bit luac
+    ├── lua-5.3.6.tar.gz : upstream lua 5.3.6 tarball, used to build 32bit luac
     ├── mkscriptbin.c : source of mkscriptbin, a tool to generate script.bin in luadb format
     └── wm_tool_mod_by_luatos.c : source of air101 / 103 firmware convert and flash tool
 ```
