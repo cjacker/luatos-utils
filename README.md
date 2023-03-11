@@ -60,7 +60,7 @@ The lua scripts written by users will be compiled and flashed as 'script.bin' (E
 
 Using 'lcd-demo' with OpenLuat 0.96 lcd panel and AIR101 as example:
 ```
-luatos-gen-script-img air101 lcd-demo
+luatos-gen-script-img air101 demos/lcd-demo
 luatos-flash-script-img air101 script-lcd-demo-air101.img
 ```
 **NOTE :** `lvgl-demo` in this repo requires base firmware support lvgl.
@@ -98,16 +98,12 @@ Then type `make` to build the new driver, it will rename the driver to `ch341-ua
 ## Dir structure
 ```
 luatos-utils
-├── ch341-mod
-│   ├── ch341.c
-│   └── Makefile
+├── ch341-mod : changed sources code fo ch341 kernel driver.
 ├── luatos-flash-soc : flash LuatOS soc file to air101/103 and esp32s3/c3
 ├── luatos-flash-script-img : flash script.img to air101/103 and script.bin to esp32s3/c3
 ├── luatos-gen-script-img : generate script.img for air101/103 and script.bin for escp32s3/c3
 ├── LICENSE
-├── lcd-demo : lcd demo for OpenLuat 0.96inch LCD panel
-├── lvgl-demo : lvgl demo for OpenLuat 0.96inch LCD panel (base firmware should support LVGL first).
-├── blink-demo : blink demo for air101/103 and esp32s3/c3 devboard
+├── demos : lcd/lvgl/blink demos for air101/103 and esp32s3/c3 devboard
 ├── Makefile
 ├── README.md
 └── utils
