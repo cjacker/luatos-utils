@@ -1,14 +1,17 @@
 # luatos-utils
 
-[LuatOS](https://github.com/openLuat/LuatOS) is a opensource, powerful embedded Lua engine for IoT devices with many components. It is able to run on lot of different SOCs (even different arch). The upstream flash tool is LuatTools, it can support flashing various SOC that LuatOS already supported, and can be used to program user's lua scripts to target device it supported, but this tool is close source and only for windows, even can not run with wine on Linux. For Linux users, it's difficult to flash lua script to LuatOS on target device.
-
-This project provide a set of utils and scripts to compile user's lua scripts and generate the `script.img` or `script.bin` for LuatOS with OpenLuat AIR101 / AIR103 and ESP32S3 / ESP32C3 Soc / Devboards.
+This project provide various utilities to compile user's lua scripts and generate `script.img` or `script.bin` for LuatOS with OpenLuat AIR101 / AIR103 / ESP32S3 / ESP32C3 Soc and devboards.
 
 You can play with LuatOS on Linux now.
 
-For a complete tutorial about AIR101 / AIR103, refer to : https://github.com/cjacker/opensource-toolchain-w80x-air101-air103
+**NOTE :** There is no plan to support AIR105 and AIR780E. AIR780E hasn't Linux flash tool. AIR105 and MH1903S is identical and based on ARM core, since it didn't export SWD interface, without modify the hardware of AIR105 devboard, there is no way to flash it with CMSIS-DAP, Jlink, ST-Link, etc. Either you switch to Windows to use LuatTools, or you can use [air105-uploader](https://github.com/racerxdl/air105-uploader) with [mh1903s firmware library](https://github.com/cjacker/mh1903_firmware_library_gcc_makefile) instead.
 
-**NOTE :** there is no plan to support AIR105 and AIR780E. AIR780E hasn't Linux flash tool. AIR105 and MH1903S is identical and based on ARM core, since it didn't export SWD interface, without modify the hardware of AIR105 devboard, there is no way to program it with CMSIS-DAP, Jlink, ST-Link, etc. Either you switch to Windows to use LuatTools, or you can use [air105-uploader](https://github.com/racerxdl/air105-uploader) with [mh1903s firmware library](https://github.com/cjacker/mh1903_firmware_library_gcc_makefile) instead.
+## About LuatOS
+[LuatOS](https://github.com/openLuat/LuatOS) is a opensource, powerful embedded Lua engine for IoT devices with many components. It is able to run on lot of different SOCs (even different arch). 
+
+For a complete tutorial about using LuatOS with AIR101 / AIR103, refer to : https://github.com/cjacker/opensource-toolchain-w80x-air101-air103
+
+The upstream flash tool is LuatTools, it is able to support flashing various SOC that LuatOS already supported, and can be used to program user's lua scripts to target device, but this tool is close source and only for windows, even can not run with wine on Linux. For Linux users, it's difficult to flash lua script to LuatOS on target device.
 
 ## Build and Install
 
@@ -17,7 +20,7 @@ To build:
 make
 ```
 
-To install system wide (it's not necessary, all utils are able to work at current dir):
+To install utilities to system wide (it's not necessary, all utils are able to work at current dir):
 ```
 sudo make install DESTDIR=<dest dir>
 ```
@@ -32,7 +35,7 @@ All above changes was done in `Makefile` when building luac.
 
 ## Usage
 
-### LuatOS soc firmware
+### To flash LuatOS soc firmware
 Usually, LuatOS release pre-built base firmwares (the `.soc` file) for several SOCs.
 Base firmware works as a fundamental layer which support runing users' lua scripts upon it.
 
@@ -48,7 +51,7 @@ After download and extracted, you will find one or more `*.soc` files, the soc f
 luatos-flash-soc <soc file>
 ```
 
-### LuatOS script image
+### To build and flash LuatOS script image
 
 The lua scripts written by users will be compiled and flashed as 'script.bin' (ESP32S3/C3) or 'script.img' (AIR101/103), you can follow below step:
 - create a `src` dir, put lua sources and other resources into it.
@@ -63,10 +66,9 @@ luatos-flash-script-img air101 script-lcd-demo-air101.img
 **NOTE :** `lvgl-demo` in this repo requires base firmware support lvgl.
 
 
-
 ## UART connection
 
-After script.img programmed, you can use below commands to connect to devboard via UART:
+After script image programmed, you can use below commands to connect to devboard via UART:
 
 ```
 tio -b 921600 /dev/ttyUSB0 -m INLCRNL
