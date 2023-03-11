@@ -15,8 +15,8 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 
 usage()
 {
-  echo "Generate air101/103 script.img."
-  echo "Usage: luatos-gen-script-img [air101|air103] src_dir"
+  echo "Generate air101/103 script.img or esp32 script.bin for LuatOS."
+  echo "Usage: luatos-gen-script-img [air101|air103|esp32] src_dir"
 }
 
 if [ ! -f "$SCRIPT_DIR/luatos-luac" ] && [ ! -f "$SCRIPT_DIR/luatos-mkscriptbin" ] && [ ! -f "$SCRIPT_DIR/luatos-wm_tool" ]; then
@@ -31,9 +31,9 @@ if [ $# -ne 2 ]; then
   exit
 fi
 
-# if not air101 and air103
-if [ "$1" != "air101" ] && [ "$1" != "air103" ]; then
-  echo "Error: only support air101 and air103"
+# if not air101 / air103 / esp32
+if [ "$1" != "air101" ] && [ "$1" != "air103" ] && [ "$1" != "esp32" ]; then
+  echo "Error: only support air101 / air103 / esp32"
   usage
   exit
 fi 
@@ -49,6 +49,9 @@ fi
 TARGET_DIR=$(mktemp -d)
 SOURCE_DIR="$2"
 
+# filename for target script.img or script.bin 
+TARGET_FIRMWARE_FILENAME=$(basename $SOURCE_DIR)
+
 if [ ! -d $SOURCE_DIR ]; then 
   echo "Error: $SOURCE_DIR not exist."
   echo "you should create a dir and put lua sources and other resources in it."
@@ -60,7 +63,7 @@ rm -rf $TARGET_DIR && mkdir $TARGET_DIR
 for i in `ls $SOURCE_DIR`; do
   if [[ "$i" = *.lua ]]; then
     FILENAME_NO_SUF=$(basename -s .lua $i)
-    $SCRIPT_DIR/luatos-luac -o $TARGET_DIR/$FILENAME_NO_SUF.luac $SOURCE_DIR/$i
+    $SCRIPT_DIR/luatos-luac -s -o $TARGET_DIR/$FILENAME_NO_SUF.luac $SOURCE_DIR/$i
   else
     cp $SOURCE_DIR/$i $TARGET_DIR/
   fi
@@ -76,19 +79,26 @@ fi
 
 # generate script.img file for AIR101
 if [ "$1""x" == "air101""x" ]; then
-  $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -o script-for-air101
-  echo "script-for-air101.img generated."
+  $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -o "script-"$TARGET_FIRMWARE_FILENAME"-air101"
+  rm -f script.bin
+  echo "script-$TARGET_FIRMWARE_FILENAME-air101.img generated."
   echo ""
   echo "It can be programmed by:"
-  echo "luatos-flash-script-img air101 script-for-air101.img"
+  echo "luatos-flash-script-img air101 script-$TARGET_FIRMWARE_FILENAME-air101.img"
 elif [ "$1""x" == "air103""x" ]; then
-  $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -o script-for-air103
-  echo "script-for-air103.img generated."
+  $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -o "script-"$TARGET_FIRMWARE_FILENAME"-air103" 
+  rm -f script.bin
+  echo "script-$TARGET_FIRMWARE_FILENAME-air103.img generated."
   echo "It can be programmed by:"
   echo ""
-  echo "luatos-flash-script-img air103 script-for-air103.img"
+  echo "luatos-flash-script-img air103 script-$TARGET_FIRMWARE_FILENAME-air103.img"
+elif [ "$1""x" == "esp32""x" ]; then
+  mv script.bin "script-"$TARGET_FIRMWARE_FILENAME"-esp32.bin"
+  echo "script.bin generated."
+  echo "It can be programmed by:"
+  echo ""
+  echo "luatos-flash-script-img [esp32s3|esp32c3] script-$TARGET_FIRMWARE_FILENAME-esp32.bin"
 fi
-rm -f script.bin
 rm -rf $TARGET_DIR 
 exit
 
