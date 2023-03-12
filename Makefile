@@ -22,7 +22,7 @@ install: all
 	install -m0755 luatos-mkscriptbin $(DESTDIR)/usr/bin
 	install -m0755 luatos-gen-script-img $(DESTDIR)/usr/bin
 	install -m0755 luatos-flash-script-img $(DESTDIR)/usr/bin
-	install -m0755 luatos-flash-base-firmware $(DESTDIR)/usr/bin
+	install -m0755 luatos-flash-soc $(DESTDIR)/usr/bin
 clean:
 	rm -f luatos-mkscriptbin luatos-wm_tool  luatos-luac
 	rm -f script.bin script-*.bin script.img script-*.img
