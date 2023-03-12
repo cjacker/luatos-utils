@@ -1,6 +1,6 @@
 # luatos-utils
 
-This project provide various utilities to compile user's lua scripts and generate `script.img` or `script.bin` for LuatOS with OpenLuat AIR101 / AIR103 / ESP32S3 / ESP32C3 Soc and devboards.
+luatos-utils is LuatOS flash tool for Linux. It supports flashing soc file of LuatOS to OpenLuat AIR101 / AIR103 and ESP32S3 / ESP32C3 Soc and devboards, also able to compile user's lua scripts and generate / flash the `script.img` or `script.bin` in luadb format to taget device.
 
 You can play with LuatOS on Linux now.
 
