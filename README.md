@@ -4,14 +4,21 @@ This project provide various utilities to compile user's lua scripts and generat
 
 You can play with LuatOS on Linux now.
 
-**NOTE :** There is no plan to support AIR105 and AIR780E. AIR780E hasn't Linux flash tool. AIR105 and MH1903S is identical and based on ARM core, since it didn't export SWD interface, without modify the hardware of AIR105 devboard, there is no way to flash it with CMSIS-DAP, Jlink, ST-Link, etc. Either you switch to Windows to use LuatTools, or you can use [air105-uploader](https://github.com/racerxdl/air105-uploader) with [mh1903s firmware library](https://github.com/cjacker/mh1903_firmware_library_gcc_makefile) instead.
+```
+$ luatos-flash-soc <luatos soc file>
+$ luatos-gen-script-img <source dir>
+$ luatos-flash-script-img <script bin or img>
+```
+
+**NOTE :** There is no plan to support AIR105 and AIR780E up to now. AIR780E doesn't have a Linux flash tool. AIR105 and MH1903S is identical and based on ARM core, since it didn't export SWD interface, without modify the hardware of AIR105 devboard, there is no way to flash it with CMSIS-DAP, Jlink, ST-Link, etc. Either you switch to Windows to use LuatTools, or you can use [air105-uploader](https://github.com/racerxdl/air105-uploader) with [mh1903s firmware library](https://github.com/cjacker/mh1903_firmware_library_gcc_makefile) instead.
 
 ## About LuatOS
-[LuatOS](https://github.com/openLuat/LuatOS) is a opensource, powerful embedded Lua engine for IoT devices with many components. It is able to run on lot of different SOCs (even different arch). 
+
+[LuatOS](https://github.com/openLuat/LuatOS) is a opensource, powerful embedded Lua engine for IoT devices with many components. It already support lots of different SOCs (even different arch), such as W806/AIR101/103, AIR105, AIR780E. 
 
 For a complete tutorial about using LuatOS with AIR101 / AIR103, refer to : https://github.com/cjacker/opensource-toolchain-w80x-air101-air103
 
-The upstream flash tool is LuatTools, it is able to support flashing various SOC that LuatOS already supported, and can be used to program user's lua scripts to target device, but this tool is close source and only for windows, even can not run with wine on Linux. For Linux users, it's difficult to flash lua script to LuatOS on target device.
+The upstream flash tool is LuatTools, it combined different flash tools together and able to flash various SOC that LuatOS already supported. But this tool is close source and only for windows, even couldn't run with wine on Linux. For Linux users, it's difficult to flash soc firmware and lua script of LuatOS to target device.
 
 ## Build and Install
 
@@ -20,14 +27,14 @@ To build:
 make
 ```
 
-To install utilities to system wide (it's not necessary, all utils are able to work at current dir):
+To install utilities to system wide (it's not always necessary, all utils are able to work at current dir without installation):
 ```
 sudo make install DESTDIR=<dest dir>
 ```
 
 **NOTE 1 :** There are some changes to upstream `luac` includes:
-- built is with "-DLUA_32BITS"
-- although `-DLUA_32BITS` already set, compared with 32bit `luac`, the result file compiled by 64bit `luac` still have a different file header, the root cause is the header of luac file contains a byte of `sizeof(size_t)`, for 64bit, it's 8, and for 32bit, it's 4. to get the same result of 32bit `luac`, I changed it to `sizeof(int)`.
+- built with "-DLUA_32BITS"
+- although `-DLUA_32BITS` already set, compared with 32bit `luac`, the result file compiled by 64bit `luac` still generate a different file header, the root cause is the header of luac file contains a byte of `sizeof(size_t)`, for 64bit, it's 8, and for 32bit, it's 4. to get the same result of 32bit `luac`, I changed it to `sizeof(int)` for 64bit luac.
 
 All above changes was done in `Makefile` when building luac.
 
@@ -36,6 +43,7 @@ All above changes was done in `Makefile` when building luac.
 ## Usage
 
 ### To flash LuatOS soc firmware
+
 Usually, LuatOS release pre-built base firmwares (the `.soc` file) for several SOCs.
 Base firmware works as a fundamental layer which support runing users' lua scripts upon it.
 
@@ -47,6 +55,7 @@ You can download various pre-built base firmwares from [LuatOS project](https://
 - For ESP32C3 : https://gitee.com/openLuat/LuatOS/releases/download/v0007.esp32c3.v1003/core_V1003.zip
 
 After download and extracted, you will find one or more `*.soc` files, the soc file can be flashed to target device by:
+
 ```
 luatos-flash-soc <soc file>
 ```
@@ -55,7 +64,7 @@ luatos-flash-soc <soc file>
 
 The lua scripts written by users will be compiled and flashed as 'script.bin' (ESP32S3/C3) or 'script.img' (AIR101/103), you can follow below step:
 - create a `src` dir, put lua sources and other resources into it.
-- run `luatos-gen-script-img [air101|air103|esp32] src_dir` to generate `script.img` for air101 / air103 or `script.bin` for esp32s3 /esp32c3.
+- run `luatos-gen-script-img [air101|air103|esp32] src_dir` to compile the lua sources and generate `script.img` for air101 / air103 or `script.bin` for esp32s3 /esp32c3.
 - run `luatos-flash-script-img [air101|air103|esp32c3|esp32s3] <script.img>` to program `script.img` to air101 / air103 or `script.bin` to esp32s3 / esp32c3.
 
 Using 'lcd-demo' with OpenLuat 0.96 lcd panel and AIR101 as example:
@@ -68,7 +77,7 @@ luatos-flash-script-img air101 script-lcd-demo-air101.img
 
 ## UART connection
 
-After script image programmed, you can use below commands to connect to devboard via UART:
+After script image programmed, you can use below commands to connect to devboard via UART, 921600 is the default baudrate defined by base firmware:
 
 ```
 tio -b 921600 /dev/ttyUSB0 -m INLCRNL
@@ -79,15 +88,15 @@ Or
 picocom -b 921600 /dev/ttyUSB0 --imap spchex,lfcrlf
 ```
 
-## RTS behavior
+## RTS behavior of Linux
 
-Open serial port will cause target device RESET with Linux (Windows will not). If your devboards has RTS or DTR pin connect to RESET pin of the chip, every time the serial port opened, it will reset target device.
+Openning serial port will cause target device RESET on Linux (and Windows will not). If your devboards has RTS or DTR pin connect to RESET pin of the chip, every time the serial port opened, target device reset.
 
-Refer to [https://stackoverflow.com/questions/5090451/how-to-open-serial-port-in-linux-without-changing-any-pin](https://stackoverflow.com/questions/5090451/how-to-open-serial-port-in-linux-without-changing-any-pin) for more info.
+Refer to [https://stackoverflow.com/questions/5090451/how-to-open-serial-port-in-linux-without-changing-any-pin](https://stackoverflow.com/questions/5090451/how-to-open-serial-port-in-linux-without-changing-any-pin) for more info about this serial port behavior.
 
-For LuatOS, it heavily depend on UART log for debugging and monitoring, everytime the serial port opened, it will reset the target device. this hehavior is unacceptable.
+For LuatOS, it heavily depend on UART log for debugging and monitoring. "reset device every time when serial port openned ?" - this hehavior is unacceptable.
 
-For Air 101 and 103 board, there is CH34X UART chip on board, we can change this behavior by modify the driver source code.
+For Air 101 and 103 devboards, there is CH34X UART chip on board, we can change this behavior by modify the source codes of ch341 driver.
 
 You can download the `ch341.c` from `drivers/usb/serial/ch341.c` of upstream kernel, and find `ch341_dtr_rts` function, comment out all contents of this function and put it in `ch341-mod` dir.
 
@@ -114,7 +123,7 @@ luatos-utils
 
 ## More about soc file
 
-LuatOS soc firmware is actually 7z archives, you can extract it by :
+LuatOS soc firmware is actually a 7z archive, you can extract it by :
 ```
 7za x <soc file>
 ```
