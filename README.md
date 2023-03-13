@@ -1,6 +1,6 @@
 # luatos-utils
 
-luatos-utils is LuatOS flash tool for Linux. It supports flashing soc file of LuatOS to OpenLuat AIR101 / AIR103 and ESP32S3 / ESP32C3 Soc and devboards, also able to compile user's lua scripts and generate / flash the `script.img` or `script.bin` in luadb format to taget device.
+luatos-utils is LuatOS flash tool for Linux. It supports flashing soc file of LuatOS to OpenLuat AIR101 / AIR103 and ESP32S3 / ESP32C3 Soc and devboards, also able to compile user's lua scripts and generate / flash the `script.img` in luadb format to taget device.
 
 You can play with LuatOS on Linux now.
 
@@ -33,8 +33,8 @@ sudo make install DESTDIR=<dest dir>
 ```
 
 **NOTE 1 :** There are some changes to upstream `luac` includes:
-- built with "-DLUA_32BITS"
-- although `-DLUA_32BITS` already set, compared with 32bit `luac`, the result file compiled by 64bit `luac` still generate a different file header, the root cause is the header of luac file contains a byte of `sizeof(size_t)`, for 64bit, it's 8, and for 32bit, it's 4. to get the same result of 32bit `luac`, I changed it to `sizeof(int)` for 64bit luac.
+- built it with "-DLUA_32BITS"
+- although `-DLUA_32BITS` already set, comparing with 32bit `luac`, the result compiled by 64bit `luac` still generate a different file header, the root cause is the header of luac file contains a byte of `sizeof(size_t)`, for 64bit, it's 8, and for 32bit, it's 4. to get the same result of 32bit `luac`, I changed it to `sizeof(int)` to get the same result.
 
 All above changes was done in `Makefile` when building luac.
 
