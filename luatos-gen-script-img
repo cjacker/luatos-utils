@@ -44,23 +44,28 @@ TARGET_DIR=$(mktemp -d)
 SOURCE_DIR="$2"
 
 # filename for target script.img or script.bin 
-TARGET_FIRMWARE_FILENAME=script-"$(basename $SOURCE_DIR)"-"$1"
+TARGET_FIRMWARE_FILENAME=script-$(basename "$SOURCE_DIR")-"$1"
 
-rm -rf $TARGET_DIR && mkdir $TARGET_DIR
+rm -rf "$TARGET_DIR" && mkdir "$TARGET_DIR"
 
-for i in `ls $SOURCE_DIR`; do
-  if [[ "$i" = *.lua ]]; then
-    FILENAME_NO_SUF=$(basename -s .lua $i)
-    $SCRIPT_DIR/luatos-luac -s -o $TARGET_DIR/$FILENAME_NO_SUF.luac $SOURCE_DIR/$i
+for i in "$SOURCE_DIR"/*; do
+  if [ -e "$i" ]; then
+    if [[ "$i" == *.lua ]]; then
+      FILENAME_NO_SUF=$(basename -s .lua "$i")
+      "$SCRIPT_DIR"/luatos-luac -s -o "$TARGET_DIR"/"$FILENAME_NO_SUF".luac "$i"
+    else
+      cp "$i" "$TARGET_DIR/"
+    fi
   else
-    cp $SOURCE_DIR/$i $TARGET_DIR/
+	echo "no files in source dir"
+    exit
   fi
 done
 
 # command exit status
 RET=
 # generate script.bin file
-$SCRIPT_DIR/luatos-mkscriptbin $TARGET_DIR
+"$SCRIPT_DIR"/luatos-mkscriptbin "$TARGET_DIR"
 RET=$?
 
 if [ "$RET" -ne "0" ]; then
@@ -71,13 +76,13 @@ fi
 case "$1" in
   "air101" ) 
     echo -n "Generate $TARGET_FIRMWARE_FILENAME.img "
-    $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -o "$TARGET_FIRMWARE_FILENAME" >/dev/null
+    "$SCRIPT_DIR"/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -o "$TARGET_FIRMWARE_FILENAME" >/dev/null
     RET=$?
     rm -f script.bin
     ;;
   "air103" ) 
     echo -n "Generate $TARGET_FIRMWARE_FILENAME.img "
-    $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -o $TARGET_FIRMWARE_FILENAME >/dev/null
+    "$SCRIPT_DIR"/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -o "$TARGET_FIRMWARE_FILENAME" >/dev/null
     RET=$?
     rm -f script.bin
     ;;

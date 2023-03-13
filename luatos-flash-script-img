@@ -33,7 +33,7 @@ check_esptool()
 
 FIRMWARE="$2"
 
-if [ ! -f $FIRMWARE ]; then
+if [ ! -f "$FIRMWARE" ]; then
   echo "Error: $FIRMWARE not exist."
   exit
 fi
@@ -41,19 +41,19 @@ fi
 case "$1" in
   "air101" )
     check_wm_tool
-    $SCRIPT_DIR/luatos-wm_tool -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl $FIRMWARE 
+    "$SCRIPT_DIR"/luatos-wm_tool -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl "$FIRMWARE"
     ;;
   "air103" )
     check_wm_tool
-    $SCRIPT_DIR/luatos-wm_tool -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl $FIRMWARE
+    "$SCRIPT_DIR"/luatos-wm_tool -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl "$FIRMWARE"
     ;;
   "esp32s3" )
     check_esptool
-    esptool.py write_flash 0xF90000 $FIRMWARE 
+    esptool.py write_flash 0xF90000 "$FIRMWARE "
     ;;
   "esp32c3" )
     check_esptool
-    esptool.py write_flash 0x390000 $FIRMWARE 
+    esptool.py write_flash 0x390000 "$FIRMWARE" 
     ;;
   * )
     echo "Error: only support air101 / air103 / esp32s3 / esp32c3."

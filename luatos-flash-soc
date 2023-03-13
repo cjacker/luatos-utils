@@ -25,19 +25,19 @@ SOC_FILE="$1"
 TMP_DIR=$(mktemp -d)
 
 # info.json should alway exists
-INFO_JSON=$TMP_DIR/info.json
+INFO_JSON="$TMP_DIR"/info.json
 
 # extract it
-7za -bso0 -bsp0 -aoa x $SOC_FILE -o$TMP_DIR
+7za -bso0 -bsp0 -aoa x "$SOC_FILE" -o"$TMP_DIR"
 
-if [ ! -f $INFO_JSON ]; then
+if [ ! -f "$INFO_JSON" ]; then
   echo "Error : wrong soc file."
   exit
 fi
 
-CHIP_TYPE=$(grep -o '"type": "[^"]*' $INFO_JSON | grep -o '[^"]*$'|head -n 1)
+CHIP_TYPE=$(grep -o '"type": "[^"]*' "$INFO_JSON" | grep -o '[^"]*$' | head -n 1)
 
-if [ $CHIP_TYPE"x" == "x" ]; then
+if [ "$CHIP_TYPE""x" == "x" ]; then
   if grep -q AIR101.fls "$INFO_JSON"; then
     CHIP_TYPE=air101
   elif grep -q AIR103.fls "$INFO_JSON"; then    
@@ -45,34 +45,34 @@ if [ $CHIP_TYPE"x" == "x" ]; then
   fi
 fi
 
-if [ $CHIP_TYPE"x" == "x" ]; then
+if [ "$CHIP_TYPE""x" == "x" ]; then
   echo "Error : wrong soc file."
   exit
 fi
 
-if [ $CHIP_TYPE"x" == "air101""x" ] && [ -f $TMP_DIR/AIR101.fls ]; then
+if [ "$CHIP_TYPE""x" == "air101""x" ] && [ -f "$TMP_DIR"/AIR101.fls ]; then
   if [ ! -f "$SCRIPT_DIR/luatos-wm_tool" ]; then
     echo "please build luatos-wm_tool first."
     exit
   fi
-  $SCRIPT_DIR/luatos-wm_tool -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl $TMP_DIR/AIR101.fls
+  "$SCRIPT_DIR"/luatos-wm_tool -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl "$TMP_DIR"/AIR101.fls
 fi
 
-if [ $CHIP_TYPE"x" == "air103""x" ] && [ -f $TMP_DIR/AIR103.fls ]; then
+if [ "$CHIP_TYPE""x" == "air103""x" ] && [ -f "$TMP_DIR"/AIR103.fls ]; then
   if [ ! -f "$SCRIPT_DIR/luatos-wm_tool" ]; then
     echo "please build luatos-wm_tool first."
     exit
   fi
-  $SCRIPT_DIR/luatos-wm_tool -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl $TMP_DIR/AIR103.fls
+  "$SCRIPT_DIR"/luatos-wm_tool -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl "$TMP_DIR"/AIR103.fls
 fi
 
-if [ $CHIP_TYPE"x" == "esp32""x" ] && [ -f $TMP_DIR/partition-table.bin ]; then
+if [ "$CHIP_TYPE""x" == "esp32""x" ] && [ -f "$TMP_DIR"/partition-table.bin ]; then
   if ! [ -x "$(command -v esptool.py)" ]; then
     echo "please install esptool.py first."
     exit
   fi
-  esptool.py write_flash 0x0000 $TMP_DIR/bootloader.bin 0x8000 $TMP_DIR/partition-table.bin 0x10000 $TMP_DIR/luatos.bin 
+  esptool.py write_flash 0x0000 "$TMP_DIR"/bootloader.bin 0x8000 "$TMP_DIR"/partition-table.bin 0x10000 "$TMP_DIR"/luatos.bin 
 fi
 
-rm -rf $TMP_DIR
+rm -rf "$TMP_DIR"
 echo "Done"
