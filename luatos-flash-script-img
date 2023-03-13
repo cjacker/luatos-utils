@@ -9,43 +9,56 @@ usage()
   echo "Usage: luatos-flash-script-img [air101|air103|esp32c3|esp32s3] <script.[img|bin]>"
 }
 
-# if not air101 and air103
-if [ "$1" != "air101" ] && [ "$1" != "air103" ] && [ "$1" != "esp32c3" ] && [ "$1" != "esp32s3" ]; then
-  usage
-  exit
-fi
-
-
-if [ "$1" == "air101" ] || [ "$1" == "air103" ]; then
-  if [ ! -f "$SCRIPT_DIR/luatos-wm_tool" ]; then
-    echo "please build luatos-wm_tool first."
-    exit
-  fi
-fi
-
-if [ "$1" == "esp32c3" ] || [ "$1" == "esp32s3" ]; then
-  if ! [ -x "$(command -v esptool.py)" ]; then
-    echo "please install esptool.py first."
-    exit
-  fi 
-fi
-
-
 # if no args
 if [ $# -ne 2 ]; then
   usage
   exit
 fi
 
+check_wm_tool()
+{
+  if [ ! -f "$SCRIPT_DIR/luatos-wm_tool" ]; then
+    echo "please build luatos-wm_tool first."
+    exit
+  fi
+}
+
+check_esptool()
+{
+  if ! [ -x "$(command -v esptool.py)" ]; then
+    echo "please install esptool.py first."
+    exit
+  fi
+}
+
 FIRMWARE="$2"
-if [ "$1""x" == "air101""x" ]; then
-  $SCRIPT_DIR/luatos-wm_tool -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl $FIRMWARE 
-elif [ "$1""x" == "air103""x" ]; then
-  $SCRIPT_DIR/luatos-wm_tool -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl $FIRMWARE
-elif [ "$1""x" == "esp32c3""x" ]; then
-  esptool.py write_flash 0x390000 $FIRMWARE 
-elif [ "$1""x" == "esp32s3""x" ]; then
-  esptool.py write_flash 0xF90000 $FIRMWARE 
+
+if [ ! -f $FIRMWARE ]; then
+  echo "Error: $FIRMWARE not exist."
+  exit
 fi
+
+case "$1" in
+  "air101" )
+    check_wm_tool
+    $SCRIPT_DIR/luatos-wm_tool -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl $FIRMWARE 
+    ;;
+  "air103" )
+    check_wm_tool
+    $SCRIPT_DIR/luatos-wm_tool -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl $FIRMWARE
+    ;;
+  "esp32s3" )
+    check_esptool
+    esptool.py write_flash 0xF90000 $FIRMWARE 
+    ;;
+  "esp32c3" )
+    check_esptool
+    esptool.py write_flash 0x390000 $FIRMWARE 
+    ;;
+  * )
+    echo "Error: only support air101 / air103 / esp32s3 / esp32c3."
+    exit
+    ;;
+esac
 
 echo "Done. you may need reset the target device."

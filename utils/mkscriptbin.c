@@ -173,6 +173,6 @@ int main(int argc, char* argv[]) {
     }	
 
     fclose(fp);
-	printf("script.bin generated.\n");
+	  //printf("script.bin generated.\n");
     return 0;
 }

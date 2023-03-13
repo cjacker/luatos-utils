@@ -4,7 +4,7 @@
 # picocom -b 921600 /dev/ttyUSB0 --imap spchex,lfcrlf
 # tio -b 921600 /dev/ttyUSB0 -m INLCRNL
 
-# generate whole firmware:
+# generate whole firmware for air101/103:
 # cp AIR[101|103].fls final.fls
 # cat script-for-air[101|103].img >>final.fls
 # rm -f script.img script.bin
@@ -20,7 +20,7 @@ usage()
 }
 
 if [ ! -f "$SCRIPT_DIR/luatos-luac" ] && [ ! -f "$SCRIPT_DIR/luatos-mkscriptbin" ] && [ ! -f "$SCRIPT_DIR/luatos-wm_tool" ]; then
-  echo "please build luatos-luac & luatos-mkscriptbin & luatos-wm_tool first."
+  echo "Please build luatos-luac & luatos-mkscriptbin & luatos-wm_tool first."
   exit
 fi
 
@@ -31,16 +31,10 @@ if [ $# -ne 2 ]; then
   exit
 fi
 
-# if not air101 / air103 / esp32
-if [ "$1" != "air101" ] && [ "$1" != "air103" ] && [ "$1" != "esp32" ]; then
-  echo "Error: only support air101 / air103 / esp32"
-  usage
-  exit
-fi 
-
+# if arg2 is not exist or not a dir
 if [ ! -d "$2" ]; then
   echo "Error : source dir not exist."
-  usage
+  echo "Please create a dir and put lua sources and other resources in it."
   exit
 fi
 
@@ -50,13 +44,7 @@ TARGET_DIR=$(mktemp -d)
 SOURCE_DIR="$2"
 
 # filename for target script.img or script.bin 
-TARGET_FIRMWARE_FILENAME=$(basename $SOURCE_DIR)
-
-if [ ! -d $SOURCE_DIR ]; then 
-  echo "Error: $SOURCE_DIR not exist."
-  echo "you should create a dir and put lua sources and other resources in it."
-  exit
-fi
+TARGET_FIRMWARE_FILENAME=script-"$(basename $SOURCE_DIR)"-"$1"
 
 rm -rf $TARGET_DIR && mkdir $TARGET_DIR
 
@@ -69,36 +57,47 @@ for i in `ls $SOURCE_DIR`; do
   fi
 done
 
+# command exit status
+RET=
 # generate script.bin file
 $SCRIPT_DIR/luatos-mkscriptbin $TARGET_DIR
+RET=$?
 
-if [ ! -f "./script.bin" ]; then
-	echo "Generate script.bin failed !"
+if [ "$RET" -ne "0" ]; then
+	echo "luatos-mkscriptbin failed !"
 	exit
 fi
 
-# generate script.img file for AIR101
-if [ "$1""x" == "air101""x" ]; then
-  $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -o "script-"$TARGET_FIRMWARE_FILENAME"-air101"
-  rm -f script.bin
-  echo "script-$TARGET_FIRMWARE_FILENAME-air101.img generated."
-  echo ""
-  echo "It can be programmed by:"
-  echo "luatos-flash-script-img air101 script-$TARGET_FIRMWARE_FILENAME-air101.img"
-elif [ "$1""x" == "air103""x" ]; then
-  $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -o "script-"$TARGET_FIRMWARE_FILENAME"-air103" 
-  rm -f script.bin
-  echo "script-$TARGET_FIRMWARE_FILENAME-air103.img generated."
-  echo "It can be programmed by:"
-  echo ""
-  echo "luatos-flash-script-img air103 script-$TARGET_FIRMWARE_FILENAME-air103.img"
-elif [ "$1""x" == "esp32""x" ]; then
-  mv script.bin "script-"$TARGET_FIRMWARE_FILENAME"-esp32.bin"
-  echo "script.bin generated."
-  echo "It can be programmed by:"
-  echo ""
-  echo "luatos-flash-script-img [esp32s3|esp32c3] script-$TARGET_FIRMWARE_FILENAME-esp32.bin"
+case "$1" in
+  "air101" ) 
+    echo -n "Generate $TARGET_FIRMWARE_FILENAME.img "
+    $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 81E0000 -ua 0 -nh 0  -un 0 -o "$TARGET_FIRMWARE_FILENAME" >/dev/null
+    RET=$?
+    rm -f script.bin
+    ;;
+  "air103" ) 
+    echo -n "Generate $TARGET_FIRMWARE_FILENAME.img "
+    $SCRIPT_DIR/luatos-wm_tool -b script.bin -it 1 -fc 0 -ih 20008000 -ra 80E0000 -ua 0 -nh 0  -un 0 -o $TARGET_FIRMWARE_FILENAME >/dev/null
+    RET=$?
+    rm -f script.bin
+    ;;
+  "esp32" )  
+    echo -n "Genereate $TARGET_FIRMWARE_FILENAME.img " 
+    mv script.bin "$TARGET_FIRMWARE_FILENAME.img"
+    RET=$?
+    ;;
+  * )  
+    echo "Error: only support air101 / air103 / esp32"
+    RET=1
+    exit
+    ;;
+esac
+
+if [ "$RET" -eq "0" ]
+then
+  echo "[done]"
+  echo "It can be programmed by luatos-flash-script-img."
+else
+  echo "[failed]"
 fi
-rm -rf $TARGET_DIR 
-exit
 

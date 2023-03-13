@@ -30,16 +30,12 @@ INFO_JSON=$TMP_DIR/info.json
 # extract it
 7za -bso0 -bsp0 -aoa x $SOC_FILE -o$TMP_DIR
 
-CHIP_TYPE=
-
 if [ ! -f $INFO_JSON ]; then
   echo "Error : wrong soc file."
   exit
 fi
 
-if [ -f $INFO_JSON ]; then
-  CHIP_TYPE=$(grep -o '"type": "[^"]*' $INFO_JSON | grep -o '[^"]*$'|head -n 1)
-fi
+CHIP_TYPE=$(grep -o '"type": "[^"]*' $INFO_JSON | grep -o '[^"]*$'|head -n 1)
 
 if [ $CHIP_TYPE"x" == "x" ]; then
   if grep -q AIR101.fls "$INFO_JSON"; then
