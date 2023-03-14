@@ -20,23 +20,29 @@ fi
 
 # soc file to be flashed
 SOC_FILE="$1"
-
 # tmp dir to extract soc to
 TMP_DIR=$(mktemp -d)
-
-# info.json should alway exists
+# info.json should alway exist
 INFO_JSON="$TMP_DIR"/info.json
 
 # extract it
 7za -bso0 -bsp0 -aoa x "$SOC_FILE" -o"$TMP_DIR"
+RET=$?
+
+if [ "$RET" -ne "0" ]; then
+  echo "Error: extract soc file failed."
+  exit
+fi
 
 if [ ! -f "$INFO_JSON" ]; then
   echo "Error : wrong soc file."
   exit
 fi
 
+# try to detect esp32 first
 CHIP_TYPE=$(grep -o '"type": "[^"]*' "$INFO_JSON" | grep -o '[^"]*$' | head -n 1)
 
+# if not esp32, it's air101 or 103
 if [ "$CHIP_TYPE""x" == "x" ]; then
   if grep -q AIR101.fls "$INFO_JSON"; then
     CHIP_TYPE=air101
@@ -45,34 +51,61 @@ if [ "$CHIP_TYPE""x" == "x" ]; then
   fi
 fi
 
+# if not air101 and 103, then exit
 if [ "$CHIP_TYPE""x" == "x" ]; then
-  echo "Error : wrong soc file."
+  echo "Error : soc file not supported."
   exit
 fi
 
-if [ "$CHIP_TYPE""x" == "air101""x" ] && [ -f "$TMP_DIR"/AIR101.fls ]; then
+
+check-wm_tool()
+{
   if [ ! -f "$SCRIPT_DIR/luatos-wm_tool" ]; then
     echo "please build luatos-wm_tool first."
     exit
   fi
-  "$SCRIPT_DIR"/luatos-wm_tool -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl "$TMP_DIR"/AIR101.fls
-fi
+}
 
-if [ "$CHIP_TYPE""x" == "air103""x" ] && [ -f "$TMP_DIR"/AIR103.fls ]; then
-  if [ ! -f "$SCRIPT_DIR/luatos-wm_tool" ]; then
-    echo "please build luatos-wm_tool first."
-    exit
-  fi
-  "$SCRIPT_DIR"/luatos-wm_tool -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl "$TMP_DIR"/AIR103.fls
-fi
-
-if [ "$CHIP_TYPE""x" == "esp32""x" ] && [ -f "$TMP_DIR"/partition-table.bin ]; then
+check-esptool()
+{
   if ! [ -x "$(command -v esptool.py)" ]; then
     echo "please install esptool.py first."
     exit
   fi
-  esptool.py write_flash 0x0000 "$TMP_DIR"/bootloader.bin 0x8000 "$TMP_DIR"/partition-table.bin 0x10000 "$TMP_DIR"/luatos.bin 
-fi
+}
+
+check-fileexist()
+{
+  FILE="$1"
+  if [ ! -f "$FILE" ]; then
+    echo "Error: $FILE not exist"
+    exit
+  fi
+}
+
+case "$CHIP_TYPE" in
+  "air101" )
+    check-wm_tool
+    check-fileexist "$TMP_DIR"/AIR101.fls
+    "$SCRIPT_DIR"/luatos-wm_tool -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl "$TMP_DIR"/AIR101.fls
+    ;;
+  "air103" )
+    check-wm_tool
+    check-fileexist "$TMP_DIR"/AIR103.fls
+    "$SCRIPT_DIR"/luatos-wm_tool -ds 2M -c ttyUSB0 -ws 115200 -rs rts -dl "$TMP_DIR"/AIR103.fls
+    ;;
+  "esp32" )
+    check-esptool
+    check-fileexist "$TMP_DIR"/bootloader.bin
+    check-fileexist "$TMP_DIR"/partition-table.bin
+    check-fileexist "$TMP_DIR"/luatos.bin
+    esptool.py write_flash 0x0000 "$TMP_DIR"/bootloader.bin 0x8000 "$TMP_DIR"/partition-table.bin 0x10000 "$TMP_DIR"/luatos.bin 
+    ;;
+   * )
+    echo "Error: soc file not supported"
+    exit
+    ;;
+esac
 
 rm -rf "$TMP_DIR"
 echo "Done"
